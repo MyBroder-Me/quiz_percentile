@@ -79,18 +79,19 @@ class block_quiz_percentile extends block_base {
                     SELECT COUNT(*) AS qty FROM user_grades
                 )
                 SELECT
-                    CASE
-                        WHEN tc.qty < 2 THEN 100
-                        ELSE
-			case
-				when r.percentile < 4 then r.percentile
-				when r.percentile between 4 and 30 then 30
-				else r.percentile
-			end
-                    END AS final_percentile
-                FROM ranked r
-                JOIN total_count tc ON true
-                WHERE r.userid = :userid;
+                    case
+                            when r.percentile < 4 then r.percentile
+                        when r.percentile between 4 and 30 then 30
+                        else r.percentile
+                    end AS final_percentile
+                FROM
+                    ranked r
+                JOIN total_count tc ON
+                    true
+                WHERE
+                    tc.qty > 24
+                    and
+                    r.userid = :userid;
             ";
 
 
@@ -102,14 +103,16 @@ class block_quiz_percentile extends block_base {
         $test = "reserved";
 
         $percentile = $DB->get_record_sql($sql, $params);
-
+        if (!$percentile) {
+            $this->content = new stdClass();
+            $this->content->text = "Aún no hay resultados para mostrar.";
+            return $this->content;
+        }
         $percentile_final = round($percentile->final_percentile, 0);
 
         $this->content = new stdClass();
         if ($percentile_final) {
             $this->content->text = "Tu percentil en este cuestionario es: <strong>" . $percentile_final . "</strong>";
-        } else {
-            $this->content->text = "Aún no hay resultados para mostrar.";
         }
 
         // Debugging: JavaScript logging
