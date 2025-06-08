@@ -103,17 +103,21 @@ class block_quiz_percentile extends block_base {
         $test = "reserved";
 
         $percentile = $DB->get_record_sql($sql, $params);
-        if (!$percentile) {
-            $this->content = new stdClass();
+        if (!$percentile || !isset($percentile->final_percentile)) {
             $this->content->text = "Aún no hay resultados para mostrar.";
             return $this->content;
         }
+        
         $percentile_final = round($percentile->final_percentile, 0);
+        
 
         $this->content = new stdClass();
-        if ($percentile_final) {
-            $this->content->text = "Tu percentil en este cuestionario es: <strong>" . $percentile_final . "</strong>";
+        $this->content->text = ''; // Asegura que es string
+        
+        if ($percentile_final !== null) {
+            $this->content->text .= "Tu percentil en este cuestionario es: <strong>" . $percentile_final . "</strong>";
         }
+        
 
         // Debugging: JavaScript logging
         $this->content->text .= "<script>

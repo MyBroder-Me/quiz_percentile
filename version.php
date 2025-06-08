@@ -16,15 +16,14 @@
 
 /**
 
-Version metadata for the block_pluginname plugin.*,
-@package   block_pluginname,
-@copyright Year, You Name your@email.address,
+Version metadata for the block_quiz_percentile plugin.*,
+@package   block_quiz_percentile,
+@copyright 2025, Daniel Márquez, Mykyta Ryasny 
 @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later*/
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_quiz_percentile';
-$plugin->version = 2025052222;
+$plugin->version = 2025060802;
 $plugin->requires = 2022041900;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->release = 'v1.0';
-$plugin->supported = 4.3;   // Available as of Moodle 3.9.0 or later.
