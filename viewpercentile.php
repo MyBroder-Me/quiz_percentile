@@ -1,13 +1,15 @@
 <?php
 require_once(__DIR__ . '/../../config.php');
+require_once($CFG->dirroot.'/blocks/quiz_percentile/classes/percentile_calculator.php');
+
+use block_quiz_percentile\percentile_calculator;
 
 $cmid = required_param('cmid', PARAM_INT);
 require_login();
 global $USER;
 $userid = $USER->id;
 
-$block = new block_quiz_percentile();
-$percentile = $block->calculate_percentile($cmid, $userid);
+$percentile = percentile_calculator::calculate($cmid, $userid);
 
 $context = context_system::instance();
 $PAGE->set_context($context);

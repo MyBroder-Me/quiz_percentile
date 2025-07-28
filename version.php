@@ -23,7 +23,7 @@ Version metadata for the block_quiz_percentile plugin.*,
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_quiz_percentile';
-$plugin->version = 2025060802;
+$plugin->version = 2025060804;
 $plugin->requires = 2022041900;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->release = 'v1.0';
