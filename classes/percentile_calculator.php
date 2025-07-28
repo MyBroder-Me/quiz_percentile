@@ -4,7 +4,7 @@ namespace block_quiz_percentile;
 defined('MOODLE_INTERNAL') || die();
 
 class percentile_calculator {
-    public function calculate($cmid, $userid) {
+    public static function calculate($cmid, $userid) {
         global $DB;
 
         if (!$cmid || !$userid) {
