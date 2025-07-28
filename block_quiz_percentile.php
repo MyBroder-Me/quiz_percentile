@@ -11,37 +11,21 @@ class block_quiz_percentile extends block_base {
 
     public function applicable_formats() {
        return [
-            'mod-quiz-view' => true,  // Solo disponible en la vista de cuestionarios
-            'site' => false,          // No en la portada
-            'course' => false,        // No en páginas de curso
-            'mod' => false            // No en otros módulos
+            'mod-quiz-view' => true,
+            'site' => false,
+            'course' => false,
+            'mod' => false
         ];
     }
 
-    public function get_content() {
-        global $USER, $PAGE, $DB;
+    public function calculate_percentile($cmid, $userid) {
+        global $DB;
 
-        if ($this->content !== null) {
-            return $this->content;
+        if (!$cmid || !$userid) {
+            return null;
         }
 
-        $this->content = new stdClass();
-        $this->content->text = '';
-
-        $cmid = optional_param('id', 0, PARAM_INT);
-        if (!$cmid) {
-            $this->content = new stdClass();
-            $this->content->text = get_string('nocmid', 'block_quiz_percentile');
-            return $this->content;
-        }
-
-        $userid = $USER->id;
-
-        // Debugging: Log values in the PHP error log
-        error_log("Debug Info: cmid = " . $cmid);
-        error_log("Debug Info: userid = " . $userid);
-
-    	$sql = "WITH target_quiz_name AS (
+        $sql = "WITH target_quiz_name AS (
                     SELECT mq.name
                     FROM {course_modules} mcm
                     INNER JOIN {quiz} mq ON mq.id = mcm.instance
@@ -94,39 +78,44 @@ class block_quiz_percentile extends block_base {
                     r.userid = :userid;
             ";
 
-
         $params = [
             'cmid' => $cmid,
             'userid' => $userid
         ];
 
-        $test = "reserved";
-
         $percentile = $DB->get_record_sql($sql, $params);
+
         if (!$percentile || !isset($percentile->final_percentile)) {
-            $this->content->text = "Aún no hay resultados para mostrar.";
+            return null;
+        }
+
+        return round($percentile->final_percentile, 0);
+    }
+
+    public function get_content() {
+        global $USER;
+
+        if ($this->content !== null) {
             return $this->content;
         }
-        
-        $percentile_final = round($percentile->final_percentile, 0);
-        
 
         $this->content = new stdClass();
-        $this->content->text = ''; // Asegura que es string
-        
-        if ($percentile_final !== null) {
-            $this->content->text .= "Tu percentil en este cuestionario es: <strong>" . $percentile_final . "</strong>";
-        }
-        
 
-        // Debugging: JavaScript logging
-        $this->content->text .= "<script>
-            console.log('test:', " . json_encode($test) . ");
-            console.log('test:', " . json_encode($test) . ");
-            console.log('test:', " . json_encode($test) . ");
-        </script>";
+        $cmid = optional_param('id', 0, PARAM_INT);
+        if (!$cmid) {
+            $this->content->text = get_string('nocmid', 'block_quiz_percentile');
+            return $this->content;
+        }
+
+        $userid = $USER->id;
+        $percentile = $this->calculate_percentile($cmid, $userid);
+
+        if ($percentile === null) {
+            $this->content->text = "Aún no hay resultados para mostrar.";
+        } else {
+            $this->content->text = "Tu percentil en este cuestionario es: <strong>$percentile</strong>";
+        }
 
         return $this->content;
     }
 }
-?>
