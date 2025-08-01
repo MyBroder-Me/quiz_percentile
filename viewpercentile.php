@@ -1,5 +1,6 @@
 <?php
 require_once(__DIR__ . '/../../config.php');
+$PAGE->set_pagelayout('embedded');
 require_once($CFG->dirroot.'/blocks/quiz_percentile/classes/percentile_calculator.php');
 
 use block_quiz_percentile\percentile_calculator;

@@ -4,7 +4,7 @@ namespace block_quiz_percentile;
 defined('MOODLE_INTERNAL') || die();
 
 class percentile_calculator {
-    public function calculate($cmid, $userid) {
+    public static function calculate($cmid, $userid) {
         global $DB;
 
         if (!$cmid || !$userid) {
@@ -28,22 +28,24 @@ class percentile_calculator {
                 user_grades AS (
                     SELECT
                         mqg.userid,
-                        mqg.grade AS rounded_grade,
-                        rq.*
-                    FROM {quiz_grades} mqg
+                        rq.name,
+                        ROUND(AVG(mqg.grade), 5) AS rounded_grade
+                    FROM mdl_quiz_grades mqg
                     JOIN related_quizzes rq ON rq.id = mqg.quiz
-                    JOIN {course_modules} mcm ON mcm.instance = rq.id
-                    JOIN {course} c ON c.id = mcm.course
-                    WHERE 1=1
-                      AND c.category = 1
-                      AND mcm.module = 17
+                    JOIN mdl_course_modules mcm ON mcm.instance = rq.id
+                    JOIN mdl_course c ON c.id = mcm.course
+                    WHERE
+                        c.category = 1
+                        AND mcm.module = 17
+                    GROUP BY mqg.userid, rq.name
                 ),
                 ranked AS (
                     SELECT
-                        user_grades.userid as a,
-                        PERCENT_RANK() OVER (ORDER BY rounded_grade) * 100 AS percentile,
-                        user_grades.*
-                    FROM user_grades
+                        ug.userid,
+                        ug.name,
+                        ug.rounded_grade,
+                        PERCENT_RANK() OVER (PARTITION BY ug.name ORDER BY ug.rounded_grade) * 100 AS percentile
+                    FROM user_grades ug
                 ),
                 total_count AS (
                     SELECT COUNT(*) AS qty FROM user_grades
